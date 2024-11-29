@@ -132,7 +132,7 @@ for (var i = 0; i < 15; i++) {
   squares.push(new Cube(-300 + i * 200));
 }
 
-ctx.strokeStyle = "#00FF00";
+ctx.strokeStyle = "#FF0233";
 
 // Update and render loop
 function render() {
@@ -145,71 +145,25 @@ function render() {
     squares[i].render();
   }
 
-  // Bars animation
-  ctxBars.clearRect(0, 0, canvasBars.width, canvasBars.height);
-  ctxBars.beginPath();
-  var y = canvasBars.height / 2;
-  ctxBars.moveTo(0, y);
-
-  for (var i = 0; i < canvasBars.width; i++) {
-    var ran = Math.random() * 20 - 10;
-    ctxBars.lineTo(i, y + ran);
+  // Add to console output
+  if (sineVal % 100 === 0) {
+    var randomMessage = [
+      "HACKING INTO MAINFRAME...",
+      "INJECTING MALWARE...",
+      "ACCESSING SECURE DATABASE...",
+      "DECRYPTING ENCRYPTED FILES...",
+      "SYSTEM COMPROMISED...",
+    ][Math.floor(Math.random() * 5)];
+    var newMessage = document.createElement("p");
+    newMessage.innerHTML = `<span>${randomMessage}</span>`;
+    outputConsole.appendChild(newMessage);
   }
-  ctxBars.stroke();
 
-  // Update console output
-  setTimeout(consoleOutput, 100);
-
+  sineVal++;
   requestAnimationFrame(render);
 }
 
-// Console output with typewriter effect
-var commandStart = [
-  "Initializing systems...",
-  "Accessing network...",
-  "Loading 3D models...",
-  "Downloading resources...",
-  "Decrypting files...",
-];
-
-var commandParts = [
-  "System Core...",
-  "Text File...",
-  "Model A1",
-  "Network Stack",
-  "File Transfer...",
-];
-
-var commandResponses = [
-  "System ready.",
-  "Connection established.",
-  "Resources loaded.",
-  "Decryption complete.",
-  "Files transferred.",
-];
-
-var isProcessing = false;
-var processTime = 0;
-var lastProcess = 0;
-
-function consoleOutput() {
-  if (processTime < commandStart.length && !isProcessing) {
-    isProcessing = true;
-    let startCmd = commandStart[processTime];
-    let parts = commandParts[processTime];
-    let response = commandResponses[processTime];
-    outputConsole.innerHTML += `<p><span>${startCmd}</span></p>`;
-    setTimeout(function () {
-      outputConsole.innerHTML += `<p>${parts}...<span class="typing">${response}</span></p>`;
-      processTime++;
-      isProcessing = false;
-    }, 2000);
-  }
-}
-
-// Begin rendering loop
 render();
-// Popup display function
 function showPopup() {
   const popup = document.querySelector(".popup-overlay");
   popup.style.visibility = "visible"; // Show the popup
