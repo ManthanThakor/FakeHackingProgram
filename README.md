@@ -28,8 +28,6 @@ Ensure that you have the following installed on your machine:
    git clone https://github.com/manthanthakor/FakeHackingProgram.git
    ```
 
-````
-
 2. Navigate into the project folder:
 
    ```bash
@@ -69,8 +67,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [OrbitControls.js](https://threejs.org/examples/#misc_controls_orbit) for camera controls.
 - [GLTFLoader.js](https://threejs.org/docs/index.html#examples/en/loaders/GLTFLoader) for loading GLTF models.
 
-```
-
-This `README.md` explains how the project works and gives a brief overview of how to set up and run it. It also provides an explanation of the key components and how they are implemented.
-```
-````
