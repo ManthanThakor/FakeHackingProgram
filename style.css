@@ -7,26 +7,67 @@
       format("woff");
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Source Code Pro;
+  font-family: "Source Code Pro", monospace;
   background: #000;
   color: #00ff00;
-  margin: 0;
-  font-size: 13px;
+  overflow: hidden;
 }
+
+.canvas-container {
+  display: flex;
+  justify-content: space-between;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
 canvas {
   position: absolute;
-  top: 0;
-  left: 0;
+  border: 2px solid #00ff00;
 }
+
 .bars-and-stuff {
-  left: 66.6%;
+  width: 33%;
 }
 
 .output-console {
   position: fixed;
-  overflow: hidden;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 40%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #00ff00;
+  padding: 10px;
+  overflow-y: auto;
+  font-size: 14px;
+  font-family: "Courier New", Courier, monospace;
+  text-shadow: 0 0 5px #00ff00;
 }
-p {
-  margin: 0;
+
+.output-console p {
+  margin: 5px 0;
+}
+
+.output-console span {
+  display: inline-block;
+  color: #f0f0f0;
+  font-size: 16px;
+  animation: typing 2s steps(40) 1s 1 normal both;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }

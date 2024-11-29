@@ -4,24 +4,25 @@ var canvas = document.querySelector(".hacker-3d-shiz"),
   ctxBars = canvasBars.getContext("2d"),
   outputConsole = document.querySelector(".output-console");
 
-canvas.width = (window.innerWidth / 3) * 2;
-canvas.height = window.innerHeight / 3;
+canvas.width = window.innerWidth * 0.66;
+canvas.height = window.innerHeight * 0.66;
 
-canvasBars.width = window.innerWidth / 3;
+canvasBars.width = window.innerWidth * 0.33;
 canvasBars.height = canvas.height;
 
-outputConsole.style.height = (window.innerHeight / 3) * 2 + "px";
-outputConsole.style.top = window.innerHeight / 3 + "px";
+outputConsole.style.height = window.innerHeight * 0.33 + "px";
 
-/* Graphics stuff */
-function Square(z) {
-  this.width = canvas.width / 2;
+var focal = canvas.width / 2,
+  vpx = canvas.width / 2,
+  vpy = canvas.height / 2,
+  squares = [],
+  barVals = [],
+  sineVal = 0;
 
-  if (canvas.height < 200) {
-    this.width = 200;
-  }
-
-  this.height = canvas.height;
+// Cube rotation effect
+function Cube(z) {
+  this.width = canvas.width / 3;
+  this.height = canvas.height / 3;
   z = z || 0;
 
   this.points = [
@@ -46,13 +47,16 @@ function Square(z) {
       z: z,
     }),
   ];
+
   this.dist = 0;
 }
 
-Square.prototype.update = function () {
+Cube.prototype.update = function () {
   for (var p = 0; p < this.points.length; p++) {
-    this.points[p].rotateZ(0.001);
-    this.points[p].z -= 3;
+    this.points[p].rotateX(0.01);
+    this.points[p].rotateY(0.01);
+    this.points[p].rotateZ(0.02);
+    this.points[p].z -= 2;
     if (this.points[p].z < -300) {
       this.points[p].z = 2700;
     }
@@ -60,7 +64,7 @@ Square.prototype.update = function () {
   }
 };
 
-Square.prototype.render = function () {
+Cube.prototype.render = function () {
   ctx.beginPath();
   ctx.moveTo(this.points[0].xPos, this.points[0].yPos);
   for (var p = 1; p < this.points.length; p++) {
@@ -80,14 +84,30 @@ function Point(pos) {
   this.y = pos.y - canvas.height / 2 || 0;
   this.z = pos.z || 0;
 
-  this.cX = 0;
-  this.cY = 0;
-  this.cZ = 0;
-
   this.xPos = 0;
   this.yPos = 0;
   this.map2D();
 }
+
+Point.prototype.rotateX = function (angleX) {
+  var cosX = Math.cos(angleX),
+    sinX = Math.sin(angleX),
+    y1 = this.y * cosX - this.z * sinX,
+    z1 = this.z * cosX + this.y * sinX;
+
+  this.y = y1;
+  this.z = z1;
+};
+
+Point.prototype.rotateY = function (angleY) {
+  var cosY = Math.cos(angleY),
+    sinY = Math.sin(angleY),
+    x1 = this.x * cosY - this.z * sinY,
+    z1 = this.z * cosY + this.x * sinY;
+
+  this.x = x1;
+  this.z = z1;
+};
 
 Point.prototype.rotateZ = function (angleZ) {
   var cosZ = Math.cos(angleZ),
@@ -100,64 +120,23 @@ Point.prototype.rotateZ = function (angleZ) {
 };
 
 Point.prototype.map2D = function () {
-  var scaleX = focal / (focal + this.z + this.cZ),
-    scaleY = focal / (focal + this.z + this.cZ);
+  var scaleX = focal / (focal + this.z),
+    scaleY = focal / (focal + this.z);
 
-  this.xPos = vpx + (this.cX + this.x) * scaleX;
-  this.yPos = vpy + (this.cY + this.y) * scaleY;
+  this.xPos = vpx + this.x * scaleX;
+  this.yPos = vpy + this.y * scaleY;
 };
 
-// Init graphics stuff
-var squares = [],
-  focal = canvas.width / 2,
-  vpx = canvas.width / 2,
-  vpy = canvas.height / 2,
-  barVals = [],
-  sineVal = 0;
+// Init cube animation
+for (var i = 0; i < 15; i++) {
+  squares.push(new Cube(-300 + i * 200));
+}
 
-/* fake console stuff */
-var commandStart = [
-    "Performing DNS Lookups for",
-    "Searching ",
-    "Analyzing ",
-    "Estimating Approximate Location of ",
-    "Compressing ",
-    "Requesting Authorization From : ",
-    "wget -a -t ",
-    "tar -xzf ",
-    "Entering Location ",
-    "Compilation Started of ",
-    "Downloading ",
-  ],
-  commandParts = [
-    "Data Structure",
-    "http://wwjd.com?au&2",
-    "Texture",
-    "TPS Reports",
-    " .... Searching ... ",
-    "http://zanb.se/?23&88&far=2",
-    "http://ab.ret45-33/?timing=1ww",
-  ],
-  commandResponses = [
-    "Authorizing ",
-    "Authorized...",
-    "Access Granted..",
-    "Going Deeper....",
-    "Compression Complete.",
-    "Compilation of Data Structures Complete..",
-    "Entering Security Console...",
-    "Encryption Unsuccesful Attempting Retry...",
-    "Waiting for response...",
-    "....Searching...",
-    "Calculating Space Requirements ",
-  ],
-  isProcessing = false,
-  processTime = 0,
-  lastProcess = 0;
+ctx.strokeStyle = "#00FF00";
 
+// Update and render loop
 function render() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-
   squares.sort(function (a, b) {
     return b.dist - a.dist;
   });
@@ -166,116 +145,67 @@ function render() {
     squares[i].render();
   }
 
+  // Bars animation
   ctxBars.clearRect(0, 0, canvasBars.width, canvasBars.height);
-
   ctxBars.beginPath();
-  var y = canvasBars.height / 6;
+  var y = canvasBars.height / 2;
   ctxBars.moveTo(0, y);
 
-  for (i = 0; i < canvasBars.width; i++) {
+  for (var i = 0; i < canvasBars.width; i++) {
     var ran = Math.random() * 20 - 10;
-    if (Math.random() > 0.98) {
-      ran = Math.random() * 50 - 25;
-    }
     ctxBars.lineTo(i, y + ran);
   }
-
   ctxBars.stroke();
 
-  for (i = 0; i < canvasBars.width; i += 20) {
-    if (!barVals[i]) {
-      barVals[i] = {
-        val: Math.random() * (canvasBars.height / 2),
-        freq: 0.1,
-        sineVal: Math.random() * 100,
-      };
-    }
-
-    barVals[i].sineVal += barVals[i].freq;
-    barVals[i].val += Math.sin((barVals[i].sineVal * Math.PI) / 2) * 5;
-    ctxBars.fillRect(i + 5, canvasBars.height, 15, -barVals[i].val);
-  }
+  // Update console output
+  setTimeout(consoleOutput, 100);
 
   requestAnimationFrame(render);
 }
 
+// Console output with typewriter effect
+var commandStart = [
+  "Initializing systems...",
+  "Accessing network...",
+  "Loading 3D models...",
+  "Downloading resources...",
+  "Decrypting files...",
+];
+
+var commandParts = [
+  "System Core...",
+  "Text File...",
+  "Model A1",
+  "Network Stack",
+  "File Transfer...",
+];
+
+var commandResponses = [
+  "System ready.",
+  "Connection established.",
+  "Resources loaded.",
+  "Decryption complete.",
+  "Files transferred.",
+];
+
+var isProcessing = false;
+var processTime = 0;
+var lastProcess = 0;
+
 function consoleOutput() {
-  var textEl = document.createElement("p");
-
-  if (isProcessing) {
-    textEl = document.createElement("span");
-    textEl.textContent += Math.random() + " ";
-    if (Date.now() > lastProcess + processTime) {
+  if (processTime < commandStart.length && !isProcessing) {
+    isProcessing = true;
+    let startCmd = commandStart[processTime];
+    let parts = commandParts[processTime];
+    let response = commandResponses[processTime];
+    outputConsole.innerHTML += `<p><span>${startCmd}</span></p>`;
+    setTimeout(function () {
+      outputConsole.innerHTML += `<p>${parts}...<span class="typing">${response}</span></p>`;
+      processTime++;
       isProcessing = false;
-    }
-  } else {
-    var commandType = ~~(Math.random() * 4);
-    switch (commandType) {
-      case 0:
-        textEl.textContent =
-          commandStart[~~(Math.random() * commandStart.length)] +
-          commandParts[~~(Math.random() * commandParts.length)];
-        break;
-      case 3:
-        isProcessing = true;
-        processTime = ~~(Math.random() * 5000);
-        lastProcess = Date.now();
-      default:
-        textEl.textContent =
-          commandResponses[~~(Math.random() * commandResponses.length)];
-        break;
-    }
+    }, 2000);
   }
-
-  outputConsole.scrollTop = outputConsole.scrollHeight;
-  outputConsole.appendChild(textEl);
-
-  if (outputConsole.scrollHeight > window.innerHeight) {
-    var removeNodes = outputConsole.querySelectorAll("*");
-    for (var n = 0; n < ~~(removeNodes.length / 3); n++) {
-      outputConsole.removeChild(removeNodes[n]);
-    }
-  }
-
-  setTimeout(consoleOutput, ~~(Math.random() * 200));
 }
 
-setTimeout(function () {
-  canvas.width = (window.innerWidth / 3) * 2;
-  canvas.height = window.innerHeight / 3;
-
-  canvasBars.width = window.innerWidth / 3;
-  canvasBars.height = canvas.height;
-
-  outputConsole.style.height = (window.innerHeight / 3) * 2 + "px";
-  outputConsole.style.top = window.innerHeight / 3 + "px";
-
-  focal = canvas.width / 2;
-  vpx = canvas.width / 2;
-  vpy = canvas.height / 2;
-
-  for (var i = 0; i < 15; i++) {
-    squares.push(new Square(-300 + i * 200));
-  }
-
-  ctx.strokeStyle = ctxBars.strokeStyle = ctxBars.fillStyle = "#00FF00";
-
-  render();
-  consoleOutput();
-}, 200);
-
-window.addEventListener("resize", function () {
-  canvas.width = (window.innerWidth / 3) * 2;
-  canvas.height = window.innerHeight / 3;
-
-  canvasBars.width = window.innerWidth / 3;
-  canvasBars.height = canvas.height;
-
-  outputConsole.style.height = (window.innerHeight / 3) * 2 + "px";
-  outputConsole.style.top = window.innerHeight / 3 + "px";
-
-  focal = canvas.width / 2;
-  vpx = canvas.width / 2;
-  vpy = canvas.height / 2;
-  ctx.strokeStyle = ctxBars.strokeStyle = ctxBars.fillStyle = "#00FF00";
-});
+// Begin rendering loop
+render();
