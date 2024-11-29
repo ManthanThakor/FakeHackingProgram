@@ -209,3 +209,14 @@ function consoleOutput() {
 
 // Begin rendering loop
 render();
+// Popup display function
+function showPopup() {
+  const popup = document.querySelector(".popup-overlay");
+  popup.style.visibility = "visible"; // Show the popup
+  setTimeout(() => {
+    popup.style.visibility = "hidden"; // Hide after 5 seconds
+  }, 5000);
+}
+
+// Example usage: Call this function when hacking starts
+showPopup();
